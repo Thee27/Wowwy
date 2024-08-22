@@ -1,0 +1,29 @@
+import requests
+import pandas as pd
+
+
+excel_path = 'TEST.xlsx'
+df = pd.read_excel(excel_path)
+
+
+all_data = pd.DataFrame()
+
+
+for code in df['symbol']:
+    url = f"https://www.thaibma.or.th/bondprice/GetPrice/null/{code}"
+
+    # ดึงข้อมูลจาก API
+    response = requests.get(url)
+    data = response.json()
+
+    # แปลงข้อมูล JSON เป็น DataFrame
+    temp_df = pd.DataFrame(data)
+
+    # เพิ่มข้อมูลในคอลัมน์เพื่อระบุว่าเป็นข้อมูลของ code ไหน
+    temp_df['CODE'] = code
+
+    # รวมข้อมูลทั้งหมดเข้าด้วยกัน
+    all_data = pd.concat([all_data, temp_df], ignore_index=True)
+
+# บันทึกข้อมูลลง Excel
+all_data.to_excel('bond_prices.xlsx', index=False)
